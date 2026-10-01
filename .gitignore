@@ -21,3 +21,7 @@ build/
 dist/
 *.egg-info/
 .eggs/
+
+# Local data (Qdrant DB, uploaded PDFs)
+qdrant_storage/
+uploads/
