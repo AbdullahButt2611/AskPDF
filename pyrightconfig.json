@@ -1,5 +1,8 @@
 {
     "venvPath": "backend",
     "venv": "env",
-    "extraPaths": ["backend"]
+    "executionEnvironments": [
+        { "root": "backend" },
+        { "root": "frontend", "extraPaths": ["frontend/env/Lib/site-packages"] }
+    ]
 }

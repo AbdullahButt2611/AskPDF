@@ -1,35 +1,34 @@
 # RAG AI Agent
 
-All code lives in `backend/`. Run every command below from inside it (`cd backend`).
+The project has two parts, each with its own virtualenv, `requirements.txt` and `.gitignore`:
+
+- `backend/`: FastAPI API plus the Inngest workflows that ingest PDFs and answer questions
+- `frontend/`: Streamlit UI, which talks to the backend only through its HTTP API
 
 Set `GEMINI_API_KEY` (embeddings + answers) in `backend/.env`. Get one at https://aistudio.google.com/apikey.
 
-First-time setup (PowerShell):
+First-time setup, run once in each of `backend/` and `frontend/` (PowerShell):
 `python -m virtualenv env` then `.\env\Scripts\python.exe -m pip install -r requirements.txt`
 
-Activate the virtualenv first (PowerShell):
-`.\env\Scripts\Activate.ps1`
-
-(Use `python -m ...` — Windows Smart App Control blocks the `.exe` launchers in `env\Scripts`.)
+Activate a folder's virtualenv with `.\env\Scripts\Activate.ps1`.
+(Use `python -m ...` because Windows Smart App Control blocks the `.exe` launchers in `env\Scripts`.)
 
 Run each of these in its own terminal, in this order:
 
-1. Qdrant
+1. Qdrant, from `backend/`
 `docker run -d --name qdrantRagDB -p 6333:6333 -v "$(pwd)/qdrant_storage:/qdrant/storage" qdrant/qdrant`
 (already created? `docker start qdrantRagDB`)
 
-2. FastAPI server
-`python -m uvicorn main:app --reload`
-OR
-`python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000`
+2. API, from `backend/` (interactive docs at http://localhost:8000/docs)
+`python -m uvicorn app.main:app --reload`
 
 3. Inngest dev server (dashboard at http://localhost:8288)
 `npx inngest-cli@latest dev -u http://127.0.0.1:8000/api/inngest --no-discovery`
 
-4. Streamlit UI (opens at http://localhost:8501)
+4. Streamlit UI, from `frontend/` (opens at http://localhost:8501)
 `python -m streamlit run streamlit_app.py`
 
-
+Set `BACKEND_URL` in `frontend/.env` if the API isn't running at `http://localhost:8000`.
 
 Color Code:
 #E1FF51
@@ -38,8 +37,10 @@ Color Code:
 
 
 
-Let's Start the actual implementation. First I need you to review this complete code and understand it throughly without missing anything. The code currently is very basic level and is not well-written at all. Now I want to make this project a production level application right now. 
+Now for the backend I want you to work on it properly and turn this code from simple python to properly structured FastAPI Code. Make sure you first understand what are the best practices being followed, how the code is written, how the comments are added. Make sure the comments are added only when explicitly needed. Don't add for no reason at all. 
 
-First I need you to convert this entire code into a folder named backend. And inside it this environemnt and everything should be present. You can even remove this environment in the root and create a new one using `python -m virtualenv env` in the backend directory and then install all dependencies from requirements and adjust if anything needs to be adjusted for this to work properly. 
+Also structure the code into their dediated directory structure and make the imports properly. Also name the files and variables meaningfully following the best practices. 
 
-Make sure the backend has its own gitignore file which hold only the gitignore files of the backend itself. 
+Also follow the best practices for handling exceptions correctly and the errors messages should be meaningful for the user and organize the imports correctly as well. 
+
+Move the Streamlit app outside the backend and make it access the backend through APIs as well. 
