@@ -1,6 +1,6 @@
 # RAG AI Agent
 
-Set `OPENAI_API_KEY` (embeddings) and `XAI_API_KEY` (Grok answers) in `.env`.
+Set `GEMINI_API_KEY` (embeddings + answers) in `.env`. Get one at https://aistudio.google.com/apikey.
 
 Activate the virtualenv first (PowerShell):
 `.\env\Scripts\Activate.ps1`
@@ -23,3 +23,10 @@ OR
 
 4. Streamlit UI (opens at http://localhost:8501)
 `python -m streamlit run streamlit_app.py`
+
+
+
+Color Code:
+#E1FF51
+#00272C
+#F2F2F2

@@ -1,13 +1,16 @@
+import os
+
+import requests
 from dotenv import load_dotenv
 from llama_index.core.node_parser import SentenceSplitter
 from llama_index.readers.file import PDFReader
-from openai import OpenAI
 
 load_dotenv()
 
-client = OpenAI()
-EMBEDDING_MODEL = "text-embedding-3-large"
+EMBEDDING_MODEL = "gemini-embedding-001"
 EMBEDDING_DIM = 3072
+EMBED_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{EMBEDDING_MODEL}:batchEmbedContents"
+EMBED_BATCH_SIZE = 100  # Gemini caps requests per batchEmbedContents call
 
 splitter = SentenceSplitter(chunk_size=1000, chunk_overlap=200)
 
@@ -23,8 +26,24 @@ def load_and_chunk_pdf(file_path):
     return chunks
 
 def embed_texts(texts):
-    response = client.embeddings.create(
-        model=EMBEDDING_MODEL,
-        input=texts
-    )
-    return [item.embedding for item in response.data]
+    vectors = []
+    for i in range(0, len(texts), EMBED_BATCH_SIZE):
+        batch = texts[i:i + EMBED_BATCH_SIZE]
+        response = requests.post(
+            EMBED_URL,
+            headers={"x-goog-api-key": os.environ["GEMINI_API_KEY"]},
+            json={
+                "requests": [
+                    {
+                        "model": f"models/{EMBEDDING_MODEL}",
+                        "content": {"parts": [{"text": text}]},
+                        "outputDimensionality": EMBEDDING_DIM,
+                    }
+                    for text in batch
+                ]
+            },
+            timeout=60,
+        )
+        response.raise_for_status()
+        vectors.extend(item["values"] for item in response.json()["embeddings"])
+    return vectors

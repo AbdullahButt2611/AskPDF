@@ -8,7 +8,7 @@ import inngest
 import inngest.fast_api
 from dotenv import load_dotenv
 from fastapi import FastAPI
-from inngest.experimental.ai import grok
+from inngest.experimental.ai import gemini
 
 from custom_types import (
     RAGChunkAndSrc,
@@ -20,6 +20,9 @@ from data_loader import embed_texts, load_and_chunk_pdf
 from vector_db import QdrantStorage
 
 load_dotenv()
+
+# Tried in order; later models are fallbacks when earlier ones are overloaded or failing
+ANSWER_MODELS = ["gemini-3.5-flash-lite", "gemini-2.5-flash-lite"]
 
 
 inngest_client = inngest.Inngest(
@@ -69,6 +72,7 @@ async def rag_ingest_pdf(ctx: inngest.Context) -> dict[str, typing.Any]:
 @inngest_client.create_function(
     fn_id = "RAG: Query PDF",
     trigger = inngest.TriggerEvent(event="rag/query_pdf_ai"),
+    retries=1,  # the user is waiting; fall back to another model instead of long backoffs
 )
 async def rag_query_pdf_ai(ctx: inngest.Context) -> dict[str, typing.Any]:
     async def _search(question: str, top_k: int) -> RAGSearchResult:
@@ -89,28 +93,34 @@ async def rag_query_pdf_ai(ctx: inngest.Context) -> dict[str, typing.Any]:
         "Answer concisely and accurately based on the context provided"
     )
 
-    adapter = grok.Adapter(
-        auth_key=os.environ["XAI_API_KEY"],
-        model="grok-4.3",
-    )
+    body = {
+        "systemInstruction": {"parts": [{"text": "You answer questions using only the provided context"}]},
+        "contents": [{"role": "user", "parts": [{"text": user_content}]}],
+        "generationConfig": {"maxOutputTokens": 1024, "temperature": 0.2},
+    }
 
-    response = await ctx.step.ai.infer(
-        "llm-answer",
-        adapter=adapter,
-        body = {
-            "max_tokens": 1024,
-            "temperature": 0.2,
-            "messages": [
-                {"role": "system", "content": "You answer questions using only the provided context"},
-                {"role": "user", "content": user_content},
-            ],
-        }
-    )
+    for model in ANSWER_MODELS:
+        try:
+            response = await ctx.step.ai.infer(
+                f"llm-answer-{model}",
+                adapter=gemini.Adapter(auth_key=os.environ["GEMINI_API_KEY"], model=model),
+                body={**body},  # the adapter writes "model" into the body, so give each call its own copy
+            )
+        except inngest.StepError as err:
+            ctx.logger.warning(f"{model} failed, trying next model: {err}")
+            continue
 
-    choices = typing.cast(list[dict[str, typing.Any]], response["choices"])
-    answer = str(choices[0]["message"]["content"]).strip()
-    return RAGQueryResult(answer=answer, sources=found.sources, num_contexts=len(found.contexts)).model_dump()
+        candidates = typing.cast(list[dict[str, typing.Any]], response.get("candidates") or [{}])
+        parts = candidates[0].get("content", {}).get("parts", [])
+        answer = "".join(part.get("text", "") for part in parts).strip()
+        return RAGQueryResult(answer=answer, sources=found.sources, num_contexts=len(found.contexts)).model_dump()
 
+    return RAGQueryResult(
+        answer="",
+        sources=found.sources,
+        num_contexts=len(found.contexts),
+        error="The AI service is busy right now. Please try again in a minute.",
+    ).model_dump()
 
 app = FastAPI()
 

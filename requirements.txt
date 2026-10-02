@@ -41,7 +41,6 @@ inngest==0.5.19
 itsdangerous==2.2.0
 jcs==0.2.1
 Jinja2==3.1.6
-jiter==0.17.0
 joblib==1.6.0
 jsonschema==4.26.0
 jsonschema-specifications==2025.9.1
@@ -58,7 +57,6 @@ nest-asyncio==1.6.0
 networkx==3.7
 nltk==3.10.3
 numpy==2.5.3
-openai==3.19.2
 packaging==26.3
 pandas==2.3.3
 pillow==12.3.0

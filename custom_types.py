@@ -16,3 +16,4 @@ class RAGQueryResult(pydantic.BaseModel):
     answer: str
     sources: list[str]
     num_contexts: int
+    error: str | None = None

@@ -44,14 +44,18 @@ st.title("Upload a PDF to Ingest")
 uploaded = st.file_uploader("Choose a PDF", type=["pdf"], accept_multiple_files=False)
 
 if uploaded is not None:
-    with st.spinner("Uploading and triggering ingestion..."):
-        path = save_uploaded_pdf(uploaded)
-        # Kick off the event and block until the send completes
-        asyncio.run(send_rag_ingest_event(path))
-        # Small pause for user feedback continuity
-        time.sleep(0.3)
-    st.success(f"Triggered ingestion for: {path.name}")
-    st.caption("You can upload another PDF if you like.")
+    try:
+        with st.spinner("Uploading and triggering ingestion..."):
+            path = save_uploaded_pdf(uploaded)
+            # Kick off the event and block until the send completes
+            asyncio.run(send_rag_ingest_event(path))
+            # Small pause for user feedback continuity
+            time.sleep(0.3)
+    except Exception:
+        st.error("Couldn't start ingestion. Make sure the Inngest dev server and API are running, then try again.")
+    else:
+        st.success(f"Triggered ingestion for: {path.name}")
+        st.caption("You can upload another PDF if you like.")
 
 st.divider()
 st.title("Ask a question about your PDFs")
@@ -109,17 +113,26 @@ with st.form("rag_query_form"):
     submitted = st.form_submit_button("Ask")
 
     if submitted and question.strip():
-        with st.spinner("Sending event and generating answer..."):
-            # Fire-and-forget event to Inngest for observability/workflow
-            event_id = asyncio.run(send_rag_query_event(question.strip(), int(top_k)))
-            # Poll the local Inngest API for the run's output
-            output = wait_for_run_output(event_id)
-            answer = output.get("answer", "")
-            sources = output.get("sources", [])
-
-        st.subheader("Answer")
-        st.write(answer or "(No answer)")
-        if sources:
-            st.caption("Sources")
-            for s in sources:
-                st.write(f"- {s}")
+        try:
+            with st.spinner("Sending event and generating answer..."):
+                # Fire-and-forget event to Inngest for observability/workflow
+                event_id = asyncio.run(send_rag_query_event(question.strip(), int(top_k)))
+                # Poll the local Inngest API for the run's output
+                output = wait_for_run_output(event_id)
+        except TimeoutError:
+            st.warning("This is taking longer than expected. Please try again in a moment.")
+        except RuntimeError:
+            st.error("Something went wrong while answering. Please try again.")
+        except Exception:
+            st.error("Couldn't reach the backend. Make sure the Inngest dev server and API are running.")
+        else:
+            if output.get("error"):
+                st.warning(output["error"])
+            else:
+                st.subheader("Answer")
+                st.write(output.get("answer") or "(No answer)")
+                sources = output.get("sources", [])
+                if sources:
+                    st.caption("Sources")
+                    for s in sources:
+                        st.write(f"- {s}")
