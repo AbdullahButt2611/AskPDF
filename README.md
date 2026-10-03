@@ -9,10 +9,6 @@
   Ask your PDFs anything. Every answer comes from your own documents, cites its sources, and is generated on your machine.
 </p>
 
-## See It in Action
-
-[▶ Watch the 20-second demo](brag-output/brag.mp4): upload a PDF, ask a question, and get an answer with its sources.
-
 ## Features
 
 - **Answers grounded in your documents.** Each answer lists the passages it was drawn from.
