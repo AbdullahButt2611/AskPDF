@@ -39,9 +39,9 @@ class WorkflowTimeoutError(AppError):
     status_code = status.HTTP_504_GATEWAY_TIMEOUT
 
 
-class GeminiRequestError(Exception):
-    """A Gemini API call failed in a way that may succeed on retry (network error, overload, 5xx)."""
+class AIRequestError(Exception):
+    """A call to the local AI service failed in a way that may succeed on retry (timeout, 5xx)."""
 
 
-class GeminiQuotaExceededError(GeminiRequestError):
-    """Gemini rejected the call because the API key's quota or rate limit is used up (HTTP 429)."""
+class AIServiceUnavailableError(AIRequestError):
+    """The local AI service can't serve the request at all: Ollama isn't running or the model isn't installed."""

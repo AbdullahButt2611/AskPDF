@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import logging
 import uuid
 from pathlib import Path
 from typing import Any
@@ -8,7 +9,7 @@ import inngest
 from pydantic import BaseModel
 
 from app.core.config import settings
-from app.core.exceptions import GeminiQuotaExceededError
+from app.core.exceptions import AIServiceUnavailableError
 from app.schemas.document import DocumentChunks, IngestionResult
 from app.services.document_registry import document_registry
 from app.services.embeddings import embed_texts
@@ -16,12 +17,14 @@ from app.services.pdf_processing import load_and_chunk_pdf
 from app.services.vector_store import vector_store
 from app.workflows.client import DOCUMENT_UPLOADED_EVENT, inngest_client
 
+logger = logging.getLogger(__name__)
+
 _PROCESSING_FAILED_MESSAGE = (
     "Something went wrong while processing this document. Please try again in a while, "
     "or contact support if the problem continues."
 )
-_QUOTA_EXCEEDED_MESSAGE = (
-    "Something went wrong while processing this document: we've reached our AI usage limit. "
+_AI_UNAVAILABLE_MESSAGE = (
+    "Something went wrong while processing this document: the AI service isn't available. "
     "Please try again in a while, or contact support if this keeps happening."
 )
 
@@ -89,10 +92,12 @@ async def _load_and_chunk(pdf_path: Path, source_id: str, upload_id: str) -> Doc
 
 async def _embed_and_store(document: DocumentChunks) -> IngestionResult:
     try:
-        vectors = await embed_texts(document.chunks)
-    except GeminiQuotaExceededError as exc:
-        # Retrying can't help until the quota resets, so fail right away with a clear reason
-        raise inngest.NonRetriableError(_QUOTA_EXCEEDED_MESSAGE) from exc
+        vectors = await embed_texts(document.chunks, purpose="document")
+    except AIServiceUnavailableError as exc:
+        # Retrying can't help while the model or the Ollama service is missing, so fail right away
+        # The cause is logged in one line; chaining it would bury it under a long low-level traceback
+        logger.error("Embedding %s failed: %s", document.source_id, exc)
+        raise inngest.NonRetriableError(_AI_UNAVAILABLE_MESSAGE) from None
     ids = [
         str(uuid.uuid5(uuid.NAMESPACE_URL, f"{document.upload_id}:{index}"))
         for index in range(len(document.chunks))

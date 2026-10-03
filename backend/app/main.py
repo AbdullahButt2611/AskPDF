@@ -25,6 +25,8 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
         await vector_store.ensure_collection()
         await register_untracked_uploads()
         await remove_orphaned_chunks()
+    except RuntimeError:
+        raise
     except Exception as exc:
         raise RuntimeError("Could not connect to Qdrant. Make sure it is running before starting the API.") from exc
     yield

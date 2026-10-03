@@ -1,7 +1,7 @@
 import { apiRequest } from '@/lib/api-client'
 
-// Longer than the backend's own 120s answer timeout so its error message reaches the user
-const QUERY_TIMEOUT_MS = 150_000
+// Longer than the backend's own 300s answer timeout so its error message reaches the user
+const QUERY_TIMEOUT_MS = 330_000
 
 export interface Answer {
   answer: string

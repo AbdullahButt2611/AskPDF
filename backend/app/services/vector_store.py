@@ -24,17 +24,38 @@ class VectorStore:
         self._vector_size = vector_size
 
     async def ensure_collection(self) -> None:
-        if not await self._client.collection_exists(self._collection_name):
-            await self._client.create_collection(
-                collection_name=self._collection_name,
-                vectors_config=VectorParams(size=self._vector_size, distance=Distance.COSINE),
-            )
+        if await self._client.collection_exists(self._collection_name):
+            await self._recreate_if_vector_size_changed()
+        else:
+            await self._create_collection()
         for field_name in ("source", "upload_id"):
             await self._client.create_payload_index(
                 collection_name=self._collection_name,
                 field_name=field_name,
                 field_schema=PayloadSchemaType.KEYWORD,
             )
+
+    async def _create_collection(self) -> None:
+        await self._client.create_collection(
+            collection_name=self._collection_name,
+            vectors_config=VectorParams(size=self._vector_size, distance=Distance.COSINE),
+        )
+
+    async def _recreate_if_vector_size_changed(self) -> None:
+        """Vectors from different embedding models can't share a collection, even at the same size."""
+        info = await self._client.get_collection(self._collection_name)
+        vectors_config = info.config.params.vectors
+        current_size = vectors_config.size if isinstance(vectors_config, VectorParams) else None
+        if current_size == self._vector_size:
+            return
+        if info.points_count:
+            raise RuntimeError(
+                f"Qdrant collection '{self._collection_name}' holds {info.points_count} vectors of size "
+                f"{current_size}, but the embedding model produces {self._vector_size}. Delete the collection "
+                "and backend/documents.db, then upload your documents again."
+            )
+        await self._client.delete_collection(self._collection_name)
+        await self._create_collection()
 
     async def upsert(self, ids: list[str], vectors: list[list[float]], payloads: list[dict]) -> None:
         points = [

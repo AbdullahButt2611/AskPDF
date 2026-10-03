@@ -2,12 +2,13 @@
 
 Upload PDFs, ask questions in plain language, and get answers drawn only from your documents, with their sources listed.
 
-- `backend/`: FastAPI API, Inngest workflows, Qdrant vector search, Gemini embeddings and answers
+- `backend/`: FastAPI API, Inngest workflows, Qdrant vector search, and local AI through Ollama (embeddings and answers, no API key)
 - `frontend/`: React + TypeScript app (Ask, Knowledge Base, Settings with light/dark themes)
 
 ## First-time setup
 
-1. Set `GEMINI_API_KEY` in `backend/.env`. Get one at https://aistudio.google.com/apikey.
+1. Install [Ollama](https://ollama.com/download) and pull the two models (about 2.3 GB in total, CPU-friendly):
+   `ollama pull nomic-embed-text` and `ollama pull llama3.2:3b`
 2. Backend, from `backend/` (PowerShell):
    `python -m virtualenv env` then `.\env\Scripts\python.exe -m pip install -r requirements.txt`
    (Use `python -m ...` because Windows Smart App Control blocks the `.exe` launchers in `env\Scripts`. If the API fails with "An Application Control policy has blocked this file", see `backend/CLAUDE.md`.)

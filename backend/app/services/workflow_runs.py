@@ -33,7 +33,8 @@ async def wait_for_run_output(event_id: str) -> dict[str, Any]:
     async with httpx.AsyncClient(base_url=settings.inngest_api_base_url, timeout=10) as client:
         while time.monotonic() < deadline:
             run = await _fetch_latest_run(client, event_id)
-            if run is not None:
+            # This endpoint can report "Completed" while a step is still executing; only an end time is reliable
+            if run is not None and run.get("ended_at"):
                 status = run.get("status")
                 if status in _COMPLETED_STATUSES:
                     return run.get("output") or {}
