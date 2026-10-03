@@ -3,11 +3,11 @@ import { motion, useReducedMotion, type Variants } from 'motion/react'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router'
 
+import { AmbientBackground } from '@/components/brand/AmbientBackground'
 import type { KnowledgeDocument } from '@/features/documents/api'
 import { usePdfDropzone } from '@/features/documents/use-pdf-dropzone'
 import { pluralize } from '@/lib/format'
 
-import { AmbientBackground } from './AmbientBackground'
 import { DropOverlay } from './DropOverlay'
 import { HeroPrompt } from './HeroPrompt'
 import { Highlight } from './Highlight'

@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react'
 
 // Long enough for the intro animation to read as intentional instead of flashing past on fast loads
-const MINIMUM_SPLASH_MS = 1600
+const MINIMUM_SPLASH_MS = 2100
 
 let hasElapsed = false
 const listeners = new Set<() => void>()
