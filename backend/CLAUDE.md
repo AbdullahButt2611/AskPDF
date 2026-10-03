@@ -1,4 +1,4 @@
-# CLAUDE.md — backend
+# CLAUDE.md (backend)
 
 FastAPI app (package `app/`) plus the Inngest workflows that ingest PDFs and answer questions. Run every command from `backend/`.
 

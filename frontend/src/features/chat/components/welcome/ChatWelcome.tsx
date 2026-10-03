@@ -97,7 +97,6 @@ export function ChatWelcome({ readyDocuments, onAsk }: ChatWelcomeProps) {
             className="flex flex-wrap items-center gap-x-3 gap-y-1 font-label text-[11px] font-semibold tracking-[0.14em] text-subtle uppercase"
           >
             <span>{greeting()}</span>
-            <span aria-hidden="true" className="h-px w-6 bg-border-strong" />
             <Link to="/knowledge-base" className="group inline-flex items-center gap-2 transition-colors hover:text-text">
               <span className="relative flex size-2">
                 {hasDocuments && (

@@ -1,4 +1,4 @@
-# CLAUDE.md — frontend
+# CLAUDE.md (frontend)
 
 React 19 + TypeScript + Vite single-page app for AskPDF. Run every command from `frontend/`.
 

@@ -44,7 +44,7 @@ export function HeroPrompt({ value, onChange, onSubmit, suggestions, disabled, i
         className="absolute -inset-1 rounded-[1.8rem] bg-accent opacity-0 blur-xl transition-opacity duration-500 group-focus-within/prompt:opacity-40 dark:group-focus-within/prompt:opacity-25"
       />
       <div className="relative flex items-end gap-3 rounded-[1.5rem] border border-border-strong bg-surface p-2.5 pl-5 shadow-[0_24px_60px_-30px_var(--shadow-color)] transition-colors group-focus-within/prompt:border-primary">
-        <Sparkles className="mb-3 size-5 shrink-0 text-subtle transition-colors group-focus-within/prompt:text-primary" />
+        <Sparkles className="mt-3.5 size-5 shrink-0 self-start text-subtle transition-colors group-focus-within/prompt:text-primary" />
         <label htmlFor="welcome-question" className="sr-only">
           Ask a question about your documents
         </label>
