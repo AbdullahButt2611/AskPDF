@@ -25,3 +25,6 @@ dist/
 # Local data (Qdrant DB, uploaded PDFs)
 qdrant_storage/
 uploads/
+
+# Document registry (upload status, chunk counts)
+documents.db

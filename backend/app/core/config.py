@@ -32,6 +32,7 @@ class Settings:
     answer_timeout_seconds: float = 120.0
 
     upload_dir: Path = BACKEND_DIR / "uploads"
+    documents_db_path: Path = BACKEND_DIR / "documents.db"
     max_upload_size_bytes: int = 20 * 1024 * 1024
 
 

@@ -2,19 +2,16 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-PDF question-answering (RAG) app built on Gemini embeddings and answers, Qdrant for vector search, and Inngest for orchestration. It has two independent Python projects, each with its own venv (`env/`), pinned `requirements.txt`, `.gitignore`, and `CLAUDE.md`:
+AskPDF is a PDF question-answering (RAG) app. It uses Gemini for embeddings and answers, Qdrant for vector search, and Inngest for orchestration. It has two independent projects, each with its own dependencies, `.gitignore`, and `CLAUDE.md`:
 
-- **`backend/`**: FastAPI API plus the Inngest workflows. See `backend/CLAUDE.md`.
-- **`frontend/`**: Streamlit UI, which talks to the backend only over HTTP. See `frontend/CLAUDE.md`.
+- **`backend/`**: Python. FastAPI API, Inngest workflows, and a document registry. See `backend/CLAUDE.md`.
+- **`frontend/`**: React + TypeScript + Vite. Ask, Knowledge Base and Settings pages, talking to the backend only over HTTP (`/api`). See `frontend/CLAUDE.md`.
 
-Read the relevant one before working in either folder. Never install packages for one project into the other's venv.
+Read the relevant one before working in either folder.
 
 ## Shared conventions
 
-- **Windows + PowerShell.** Always invoke tools as `python -m ...`, because Windows Smart App Control blocks the `.exe` launchers in `env\Scripts`.
-- **Startup order:** Qdrant → backend API → Inngest dev server → Streamlit. The commands are in each folder's `CLAUDE.md`, and `README.md` has the full walkthrough.
-- **Type checking:** `pyrightconfig.json` in the repo root points Pylance at `backend/env` and, for `frontend/`, at `frontend/env`. Run `npx pyright` from the root; it should report 0 errors. There is no test suite or linter.
-
-## Brand colors
-
-`#E1FF51`, `#00272C`, `#F2F2F2`
+- **Windows + PowerShell.** For Python, always invoke tools as `python -m ...`, because Windows Smart App Control blocks the `.exe` launchers in `backend\env\Scripts`.
+- **Startup order:** Qdrant → backend API → Inngest dev server → `npm run dev` in `frontend/`. The commands are in each folder's `CLAUDE.md`, and `README.md` has the full walkthrough.
+- **Checks:** run `npx pyright` from the root for the backend (`pyrightconfig.json` points at `backend/env`), and `npm run build` and `npm run lint` in `frontend/`. All should report zero errors. There is no automated test suite.
+- **Brand:** deep teal `#00272C`, lime `#E1FF51`, off-white `#F2F2F2`. Fonts: Bricolage Grotesque (wordmark and headlines), Hanken Grotesk (body), JetBrains Mono (labels). In code they're defined only in `frontend/src/styles/theme.css`.

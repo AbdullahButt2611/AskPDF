@@ -1,0 +1,101 @@
+/*
+ * Design tokens. The three brand colors and three font families below are the single source of truth:
+ * every themed color is derived from them, so changing a value here restyles the whole app.
+ */
+
+:root {
+  --brand-lime: #e1ff51;
+  --brand-teal: #00272c;
+  --brand-offwhite: #f2f2f2;
+  --brand-white: #ffffff;
+  --brand-danger: #e5484d;
+
+  --font-family-display: 'Bricolage Grotesque', 'Hanken Grotesk', system-ui, sans-serif;
+  --font-family-body: 'Hanken Grotesk', system-ui, sans-serif;
+  --font-family-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --radius-card: 1.25rem;
+  --radius-control: 0.875rem;
+}
+
+:root,
+:root.light {
+  color-scheme: light;
+
+  --bg: var(--brand-offwhite);
+  --surface: var(--brand-white);
+  --surface-muted: color-mix(in oklab, var(--brand-teal) 5%, var(--brand-offwhite));
+  --border: color-mix(in oklab, var(--brand-teal) 12%, transparent);
+  --border-strong: color-mix(in oklab, var(--brand-teal) 24%, transparent);
+
+  --text: var(--brand-teal);
+  --text-muted: color-mix(in oklab, var(--brand-teal) 62%, var(--brand-offwhite));
+  --text-subtle: color-mix(in oklab, var(--brand-teal) 42%, var(--brand-offwhite));
+
+  --primary: var(--brand-teal);
+  --on-primary: var(--brand-lime);
+  --accent: var(--brand-lime);
+  --on-accent: var(--brand-teal);
+  --accent-soft: color-mix(in oklab, var(--brand-lime) 45%, var(--brand-white));
+
+  --success: color-mix(in oklab, var(--brand-teal) 70%, #2fa36b);
+  --danger: var(--brand-danger);
+  --danger-soft: color-mix(in oklab, var(--brand-danger) 10%, var(--brand-white));
+  --focus-ring: color-mix(in oklab, var(--brand-teal) 55%, transparent);
+  --shadow-color: color-mix(in oklab, var(--brand-teal) 14%, transparent);
+}
+
+:root.dark {
+  color-scheme: dark;
+
+  --bg: color-mix(in oklab, var(--brand-teal) 72%, black);
+  --surface: var(--brand-teal);
+  --surface-muted: color-mix(in oklab, var(--brand-teal) 88%, var(--brand-offwhite));
+  --border: color-mix(in oklab, var(--brand-offwhite) 10%, transparent);
+  --border-strong: color-mix(in oklab, var(--brand-offwhite) 20%, transparent);
+
+  --text: var(--brand-offwhite);
+  --text-muted: color-mix(in oklab, var(--brand-offwhite) 64%, var(--brand-teal));
+  --text-subtle: color-mix(in oklab, var(--brand-offwhite) 42%, var(--brand-teal));
+
+  --primary: var(--brand-lime);
+  --on-primary: var(--brand-teal);
+  --accent: var(--brand-lime);
+  --on-accent: var(--brand-teal);
+  --accent-soft: color-mix(in oklab, var(--brand-lime) 14%, var(--brand-teal));
+
+  --success: var(--brand-lime);
+  --danger: color-mix(in oklab, var(--brand-danger) 85%, var(--brand-offwhite));
+  --danger-soft: color-mix(in oklab, var(--brand-danger) 16%, var(--brand-teal));
+  --focus-ring: color-mix(in oklab, var(--brand-lime) 60%, transparent);
+  --shadow-color: color-mix(in oklab, black 45%, transparent);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text: var(--text);
+  --color-muted: var(--text-muted);
+  --color-subtle: var(--text-subtle);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-brand-lime: var(--brand-lime);
+  --color-brand-teal: var(--brand-teal);
+  --color-brand-offwhite: var(--brand-offwhite);
+
+  --font-display: var(--font-family-display);
+  --font-sans: var(--font-family-body);
+  --font-mono: var(--font-family-mono);
+
+  --radius-card: var(--radius-card);
+  --radius-control: var(--radius-control);
+}

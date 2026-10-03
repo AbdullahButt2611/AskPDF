@@ -1,8 +1,20 @@
 from qdrant_client import AsyncQdrantClient
-from qdrant_client.models import Distance, PointStruct, VectorParams
+from qdrant_client.models import (
+    Distance,
+    FieldCondition,
+    Filter,
+    FilterSelector,
+    MatchValue,
+    PayloadSchemaType,
+    PointStruct,
+    VectorParams,
+)
 
 from app.core.config import settings
 from app.schemas.query import RetrievedContext
+
+
+_MAX_FACET_SOURCES = 10_000
 
 
 class VectorStore:
@@ -17,6 +29,12 @@ class VectorStore:
                 collection_name=self._collection_name,
                 vectors_config=VectorParams(size=self._vector_size, distance=Distance.COSINE),
             )
+        for field_name in ("source", "upload_id"):
+            await self._client.create_payload_index(
+                collection_name=self._collection_name,
+                field_name=field_name,
+                field_schema=PayloadSchemaType.KEYWORD,
+            )
 
     async def upsert(self, ids: list[str], vectors: list[list[float]], payloads: list[dict]) -> None:
         points = [
@@ -24,6 +42,34 @@ class VectorStore:
             for point_id, vector, payload in zip(ids, vectors, payloads, strict=True)
         ]
         await self._client.upsert(collection_name=self._collection_name, points=points)
+
+    async def count_by_source(self, source_id: str) -> int:
+        result = await self._client.count(
+            collection_name=self._collection_name,
+            count_filter=_payload_filter("source", source_id),
+            exact=True,
+        )
+        return result.count
+
+    async def list_sources(self) -> set[str]:
+        response = await self._client.facet(
+            collection_name=self._collection_name, key="source", limit=_MAX_FACET_SOURCES, exact=True
+        )
+        # The payload index can keep reporting values of deleted points with a count of 0
+        return {str(hit.value) for hit in response.hits if hit.count > 0}
+
+    async def delete_by_source(self, source_id: str) -> None:
+        await self._delete_matching("source", source_id)
+
+    async def delete_by_upload(self, upload_id: str) -> None:
+        await self._delete_matching("upload_id", upload_id)
+
+    async def _delete_matching(self, key: str, value: str) -> None:
+        await self._client.delete(
+            collection_name=self._collection_name,
+            points_selector=FilterSelector(filter=_payload_filter(key, value)),
+            wait=True,
+        )
 
     async def search(self, query_vector: list[float], limit: int) -> RetrievedContext:
         response = await self._client.query_points(
@@ -42,6 +88,10 @@ class VectorStore:
                 sources.add(payload.get("source", ""))
 
         return RetrievedContext(contexts=contexts, sources=sorted(sources))
+
+
+def _payload_filter(key: str, value: str) -> Filter:
+    return Filter(must=[FieldCondition(key=key, match=MatchValue(value=value))])
 
 
 vector_store = VectorStore(

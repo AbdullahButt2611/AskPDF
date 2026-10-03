@@ -1,18 +1,36 @@
 # CLAUDE.md — frontend
 
-Streamlit UI in a single file, `streamlit_app.py`. Run every command from `frontend/`.
+React 19 + TypeScript + Vite single-page app for AskPDF. Run every command from `frontend/`.
 
-## Setup and commands
+## Commands
 
-- First-time setup: `python -m virtualenv env`, then `.\env\Scripts\python.exe -m pip install -r requirements.txt`. This venv is separate from the backend's.
-- `requirements.txt` is fully pinned and contains exactly Streamlit's dependency closure plus `requests` and `python-dotenv`.
-- Run with `python -m streamlit run streamlit_app.py` (http://localhost:8501). The backend must be running; see `../backend/CLAUDE.md`.
-- Set `BACKEND_URL` in `frontend/.env` if the API isn't at `http://localhost:8000`.
-- Smoke-test without a browser using `streamlit.testing.v1.AppTest`: load the app, fill `text_input[0]`, click `button[0]`, then inspect `subheader`, `markdown`, and `warning`.
+- `npm install`, then `npm run dev` (http://localhost:5173). The backend must be running; see `../backend/CLAUDE.md`.
+- `npm run build` runs the type check (`tsc -b`) and the production build. `npm run lint` runs oxlint. There is no test suite.
+- The dev server proxies `/api` to `VITE_BACKEND_URL` (default `http://localhost:8000`), so no CORS setup is needed. In production, set `VITE_API_BASE_URL` to the API origin, or serve both from the same origin.
+- Add React Bits components with `npx shadcn@latest add @react-bits/<Name>-TS-TW`. `components.json` sends them to `src/components/reactbits/`.
 
-## How it works
+## Structure
 
-- **The backend is the only dependency.** The frontend doesn't import backend code or talk to Inngest or Qdrant. It calls two endpoints: `POST /api/documents` (multipart field `file`) and `POST /api/queries` (`{"question", "top_k"}` → `{"answer", "sources", "num_contexts"}`).
-- **All HTTP calls go through `call_backend`,** which turns timeouts, connection failures, and non-2xx responses into `BackendError`. The message is the backend's `detail` string when there is one, and a generic message for 422 validation errors and unknown failures. Show `BackendError` messages to the user as they are.
-- **`QUERY_TIMEOUT_SECONDS` (150) must stay longer than the backend's `answer_timeout_seconds` (120),** so that the backend's own timeout message reaches the user instead of a client-side timeout.
-- **Streamlit reruns the whole script on every interaction.** The upload is guarded by `st.session_state["last_uploaded_file_id"]` so each file is sent only once. Keep that guard if you restructure the upload flow.
+- `src/app/`: providers, router and query client. Each route is lazy-loaded with React Router's `lazy`.
+- `src/routes/`: one component per page (Ask, Knowledge Base, Settings, 404). They compose features and contain little logic of their own.
+- `src/features/<feature>/`: `api.ts` holds fetch functions that map the backend's snake_case payloads to camelCase types, `queries.ts` holds the TanStack Query hooks, plus stores and components.
+  - `documents`: Knowledge Base.
+  - `chat`: Ask.
+  - `preferences`: theme and passages per answer.
+- `src/components/`:
+  - `brand/`: `Logo`, and `ReadingMark`, the animated page loader.
+  - `layout/`, `ui/`, `feedback/`: shell, primitives, splash.
+  - `reactbits/`: vendored React Bits components. Their default colors are pointed at theme tokens, and ThoughtLine uses lucide icons instead of hugeicons.
+- `src/lib/`: `apiRequest` and `ApiError` (user-facing error messages, timeouts), `cn`, formatters.
+
+## Conventions
+
+- **Theme tokens are the only source of colors and fonts.** `src/styles/theme.css` defines the three brand colors and font families once. Every light and dark token is derived from them with `color-mix()`, and `@theme inline` exposes the tokens to Tailwind (`bg-surface`, `text-muted`, `font-display`, …). Don't hard-code hex values in components. React Bits components take tokens as `var(--…)` strings.
+- **Fonts are vendored** in `src/assets/fonts`: Latin subsets of only the weights in use (Bricolage Grotesque 700, Hanken Grotesk 400/500/600, JetBrains Mono 400/500). If you add a weight, add both its `.woff2` file and its `@font-face` in `src/styles/fonts.css`.
+- **Theme:** `features/preferences/preferences-store.ts` (Zustand, persisted as `askpdf-preferences`) applies the `dark` or `light` class to `<html>` through a module-level store subscription. The inline script in `index.html` reads the same storage key before first paint. Keep the two in sync if the key or shape changes. Logos render both variants and switch with `dark:` classes.
+- **Logos** are inlined with `vite-plugin-svgr` (`?react`) so the wordmark's live text uses Bricolage Grotesque. SVGO strips their C2PA metadata at build time and must keep `removeViewBox` disabled.
+- **Server state belongs to TanStack Query, not effects.** The documents list polls every 2 s only while a document is `processing`. In-flight uploads and deletes are read with `useMutationState`.
+  - For per-file side effects, use `mutateAsync`. Per-call `mutate` callbacks only fire for the most recent call.
+  - Chat answers are written by callbacks on the `useMutation` itself, so they still land after the user navigates away.
+- **Chat history** is in-memory Zustand state (`chat-store.ts`), not persisted. `useThinkingSteps` reveals the loader's steps on a timer, because the backend returns the answer in one response. It's one of the few legitimate `useEffect`s; avoid adding others for derived state or data fetching.
+- **Duplicate uploads:** the dropzone checks names against the cached list and asks before overwriting. A 409 from the API (a race) goes through the same dialog.

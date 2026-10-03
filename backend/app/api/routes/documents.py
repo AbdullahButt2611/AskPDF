@@ -1,18 +1,22 @@
-from fastapi import APIRouter, UploadFile, status
+from fastapi import APIRouter, Response, UploadFile, status
 
-from app.schemas.document import DocumentUploadResponse
-from app.services.document_storage import save_uploaded_pdf
-from app.services.workflow_runs import send_event
-from app.workflows.client import DOCUMENT_UPLOADED_EVENT
+from app.schemas.document import DocumentResponse
+from app.services import documents
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
 
+@router.get("")
+async def list_documents() -> list[DocumentResponse]:
+    return await documents.list_documents()
+
+
 @router.post("", status_code=status.HTTP_202_ACCEPTED)
-async def upload_document(file: UploadFile) -> DocumentUploadResponse:
-    pdf_path = await save_uploaded_pdf(file)
-    await send_event(
-        DOCUMENT_UPLOADED_EVENT,
-        {"pdf_path": str(pdf_path), "source_id": pdf_path.name},
-    )
-    return DocumentUploadResponse(source_id=pdf_path.name)
+async def upload_document(file: UploadFile, overwrite: bool = False) -> DocumentResponse:
+    return await documents.upload_document(file, overwrite=overwrite)
+
+
+@router.delete("/{source_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_document(source_id: str) -> Response:
+    await documents.delete_document(source_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
