@@ -25,7 +25,7 @@ export function AskPage() {
       <header className="flex items-center justify-between gap-3 px-5 py-4 sm:px-8">
         <Link
           to="/settings"
-          className="rounded-full border border-border px-3 py-1 font-mono text-[11px] tracking-wider text-subtle uppercase transition-colors hover:border-border-strong hover:text-text"
+          className="rounded-full border border-border px-3 py-1 font-label font-semibold text-[11px] tracking-wider text-subtle uppercase transition-colors hover:border-border-strong hover:text-text"
         >
           {passagesPerAnswer} passages per answer
         </Link>

@@ -60,7 +60,7 @@ export function ChatComposer({ onSubmit, disabled, placeholder }: ChatComposerPr
           <ArrowUp className="size-5" strokeWidth={2.5} />
         </button>
       </div>
-      <p className="mt-2 text-center font-mono text-[10px] tracking-wider text-subtle uppercase">
+      <p className="mt-2 text-center font-label font-semibold text-[10px] tracking-wider text-subtle uppercase">
         Enter to send · Shift + Enter for a new line
       </p>
     </form>

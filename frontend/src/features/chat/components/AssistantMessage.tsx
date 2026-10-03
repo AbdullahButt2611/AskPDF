@@ -81,14 +81,14 @@ function AnswerBody({ answer }: { answer: Answer }) {
 
       {answer.sources.length > 0 && (
         <div className="mt-5 border-t border-border pt-4">
-          <p className="font-mono text-[11px] tracking-wider text-subtle uppercase">
+          <p className="font-label font-semibold text-[11px] tracking-wider text-subtle uppercase">
             Sources · {pluralize(answer.passageCount, 'passage')}
           </p>
           <ul className="mt-2 flex flex-wrap gap-2">
             {answer.sources.map((source) => (
               <li
                 key={source}
-                className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border bg-surface-muted px-3 py-1 font-mono text-xs"
+                className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-border bg-surface-muted px-3 py-1 font-label text-xs"
               >
                 <FileText className="size-3.5 shrink-0 text-subtle" />
                 <span className="truncate">{source}</span>

@@ -63,7 +63,7 @@ function KnowledgeBaseSummary() {
       to="/knowledge-base"
       className="mt-auto rounded-card border border-border bg-surface-muted p-4 transition-colors hover:border-border-strong"
     >
-      <p className="font-mono text-[11px] tracking-wider text-subtle uppercase">Knowledge base</p>
+      <p className="font-label font-semibold text-[11px] tracking-wider text-subtle uppercase">Knowledge base</p>
       <p className="mt-1.5 font-display text-2xl">{pluralize(readyCount, 'document')}</p>
       <p className="mt-0.5 text-xs text-muted">ready to answer from</p>
       {processingCount > 0 && (

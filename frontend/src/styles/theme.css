@@ -12,7 +12,8 @@
 
   --font-family-display: 'Bricolage Grotesque', 'Hanken Grotesk', system-ui, sans-serif;
   --font-family-body: 'Hanken Grotesk', system-ui, sans-serif;
-  --font-family-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-family-label: 'Manrope', 'Hanken Grotesk', system-ui, sans-serif;
+  --font-family-mono: ui-monospace, 'Cascadia Mono', Consolas, monospace;
 
   --radius-card: 1.25rem;
   --radius-control: 0.875rem;
@@ -94,6 +95,7 @@
 
   --font-display: var(--font-family-display);
   --font-sans: var(--font-family-body);
+  --font-label: var(--font-family-label);
   --font-mono: var(--font-family-mono);
 
   --radius-card: var(--radius-card);

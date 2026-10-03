@@ -44,7 +44,7 @@ export function SplashScreen() {
         pattern="spiral"
         showTimer={false}
         fontSize={12}
-        className="relative font-mono tracking-wide text-muted uppercase"
+        className="relative font-label font-semibold tracking-wide text-muted uppercase"
       />
     </motion.div>
   )

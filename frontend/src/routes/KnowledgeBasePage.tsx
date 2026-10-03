@@ -24,7 +24,7 @@ export function KnowledgeBasePage() {
         <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {stats.map((stat) => (
             <div key={stat.label} className="rounded-card border border-border bg-surface px-4 py-3">
-              <dt className="font-mono text-[11px] tracking-wider text-subtle uppercase">{stat.label}</dt>
+              <dt className="font-label font-semibold text-[11px] tracking-wider text-subtle uppercase">{stat.label}</dt>
               <dd className="mt-1 font-display text-2xl tabular-nums">{stat.value}</dd>
             </div>
           ))}

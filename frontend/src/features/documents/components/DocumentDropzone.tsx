@@ -80,7 +80,7 @@ export function DocumentDropzone() {
             or <span className="font-semibold text-text underline underline-offset-4">browse your files</span>
           </p>
         </div>
-        <p className="font-mono text-[11px] tracking-wider text-subtle uppercase">
+        <p className="font-label font-semibold text-[11px] tracking-wider text-subtle uppercase">
           PDF · up to {MAX_UPLOAD_MB} MB · multiple files
         </p>
       </div>
@@ -98,7 +98,7 @@ export function DocumentDropzone() {
             </p>
             <ul className="mt-3 space-y-1">
               {filesToReplace.map((file) => (
-                <li key={file.name} className="truncate font-mono text-xs text-text">
+                <li key={file.name} className="truncate font-label text-xs text-text">
                   {file.name}
                 </li>
               ))}

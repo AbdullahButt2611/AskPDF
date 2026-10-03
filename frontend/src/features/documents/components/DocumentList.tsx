@@ -106,7 +106,7 @@ export function DocumentList() {
         title="Delete this document?"
         description={
           <>
-            <p className="font-mono text-xs break-all text-text">{documentToDelete?.name}</p>
+            <p className="font-label text-xs break-all text-text">{documentToDelete?.name}</p>
             <p className="mt-3">
               The file and its embeddings will be permanently removed, and answers will no longer use it.
             </p>
@@ -143,7 +143,7 @@ function RowText({ name, meta, error }: { name: string; meta: string; error?: st
         <FileText className="size-4 shrink-0 text-subtle" />
         <span className="truncate">{name}</span>
       </p>
-      <p className="mt-1 font-mono text-[11px] tracking-wide text-subtle">{meta}</p>
+      <p className="mt-1 font-label text-[11px] tracking-wide text-subtle">{meta}</p>
       {error && <p className="mt-1.5 text-sm text-danger">{error}</p>}
     </div>
   )
