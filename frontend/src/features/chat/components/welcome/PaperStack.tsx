@@ -62,7 +62,9 @@ export function PaperStack({ documents, onPick, onUpload }: PaperStackProps) {
       onPointerLeave={resetTilt}
       className="group/stack relative mx-auto h-[22rem] w-full max-w-md [perspective:1100px] sm:h-[28rem]"
     >
-      <div className="absolute inset-0 transition-transform duration-500 ease-out [transform-style:preserve-3d] [transform:rotateX(var(--stack-rx,0deg))_rotateY(var(--stack-ry,0deg))]">
+      {/* Tilted as one flat layer (no preserve-3d): in a 3D context z-index is ignored, so coplanar pages took turns
+          being "on top" under the cursor, making it flicker between pointer and arrow */}
+      <div className="absolute inset-0 transition-transform duration-500 ease-out [transform:rotateX(var(--stack-rx,0deg))_rotateY(var(--stack-ry,0deg))]">
         {pages
           .map((document, depth) => ({ document, depth }))
           .reverse()
@@ -122,7 +124,7 @@ function Page({ document, depth, animate, onPick }: PageProps) {
           ))}
         </span>
         {document && (
-          <span className="mt-auto inline-flex items-center gap-1.5 self-start rounded-full bg-primary px-3 py-1 text-xs font-semibold text-on-primary opacity-0 transition-opacity duration-300 group-hover/page:opacity-100">
+          <span className="mt-auto inline-flex items-center gap-1.5 self-start rounded-full bg-primary px-3 py-1 text-xs font-semibold text-on-primary opacity-0 transition-opacity duration-300 group-hover/stack:opacity-100 group-focus-visible/page:opacity-100">
             Summarize this →
           </span>
         )}
@@ -164,7 +166,7 @@ function Page({ document, depth, animate, onPick }: PageProps) {
       {content}
     </button>
   ) : (
-    <div aria-hidden="true" className={className} style={style}>
+    <div aria-hidden="true" className={cn(className, 'pointer-events-none')} style={style}>
       {content}
     </div>
   )
@@ -184,7 +186,7 @@ function FloatingBadge({
   return (
     <motion.span
       className={cn(
-        'absolute z-20 inline-flex items-center gap-2 rounded-full border border-border bg-surface/80 px-3.5 py-2 font-label text-[11px] font-semibold tracking-wide text-text shadow-[0_16px_36px_-20px_var(--shadow-color)] backdrop-blur-md',
+        'pointer-events-none absolute z-20 inline-flex items-center gap-2 rounded-full border border-border bg-surface/80 px-3.5 py-2 font-label text-[11px] font-semibold tracking-wide text-text shadow-[0_16px_36px_-20px_var(--shadow-color)] backdrop-blur-md',
         className,
       )}
       animate={isStatic ? undefined : { y: [0, -8, 0] }}
