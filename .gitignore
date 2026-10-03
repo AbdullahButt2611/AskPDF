@@ -1,2 +1,9 @@
 # Claude Code project files (local skills such as /brag, settings)
 .claude/
+
+
+# Brag Outcome
+/brag-output/work
+/brag-output/brag.jpg
+/brag-output/brag-plan.md
+/brag-output/share-copy.txt
