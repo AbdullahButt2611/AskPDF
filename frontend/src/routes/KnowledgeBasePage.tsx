@@ -16,8 +16,8 @@ export function KnowledgeBasePage() {
     <div className="h-full overflow-y-auto">
       <div className="mx-auto flex max-w-4xl flex-col gap-8 px-5 py-10 sm:px-8">
         <PageHeader
-          eyebrow="Knowledge base"
-          title="Your documents"
+          eyebrow="Knowledge Base"
+          title="Your Documents"
           description="Everything here is searchable from the Ask page. Remove a file and its embeddings go with it."
         />
 

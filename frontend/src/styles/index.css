@@ -55,3 +55,16 @@
     transform: scale(0.96);
   }
 }
+
+/* Slow drifting glows behind the welcome screen */
+@keyframes drift-a {
+  50% {
+    transform: translate(8%, 6%) scale(1.12);
+  }
+}
+
+@keyframes drift-b {
+  50% {
+    transform: translate(-10%, -4%) scale(0.92);
+  }
+}

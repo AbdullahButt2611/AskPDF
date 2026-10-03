@@ -9,7 +9,8 @@ interface ChatComposerProps {
   placeholder: string
 }
 
-const MAX_QUESTION_LENGTH = 2000
+export const MAX_QUESTION_LENGTH = 2000
+const COMPOSER_INPUT_ID = 'question'
 
 export function ChatComposer({ onSubmit, disabled, placeholder }: ChatComposerProps) {
   const [draft, setDraft] = useState('')
@@ -33,11 +34,11 @@ export function ChatComposer({ onSubmit, disabled, placeholder }: ChatComposerPr
   return (
     <form onSubmit={handleSubmit} className="mx-auto w-full max-w-3xl">
       <div className="flex items-end gap-2 rounded-[1.5rem] border border-border-strong bg-surface p-2 pl-5 shadow-[0_12px_40px_-20px_var(--shadow-color)] transition-colors focus-within:border-primary">
-        <label htmlFor="question" className="sr-only">
+        <label htmlFor={COMPOSER_INPUT_ID} className="sr-only">
           Your question
         </label>
         <textarea
-          id="question"
+          id={COMPOSER_INPUT_ID}
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           onKeyDown={handleKeyDown}

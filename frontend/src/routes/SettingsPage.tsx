@@ -48,7 +48,7 @@ export function SettingsPage() {
         </SettingsSection>
 
         <SettingsSection
-          title="Passages per answer"
+          title="Passages per Answer"
           description="How many passages from your documents each answer draws on. Fewer is faster and more focused; more gives broader answers."
         >
           <RubberSegment

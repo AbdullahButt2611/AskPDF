@@ -115,3 +115,4 @@ async def _embed_and_store(document: DocumentChunks) -> IngestionResult:
         # The file was replaced or deleted while this ran, so these chunks must not stay searchable
         await vector_store.delete_by_upload(document.upload_id)
     return IngestionResult(ingested_chunks=len(document.chunks))
+

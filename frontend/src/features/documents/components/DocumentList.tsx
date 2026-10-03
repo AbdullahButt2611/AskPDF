@@ -35,13 +35,13 @@ export function DocumentList() {
       .mutateAsync(document.name)
       .then(() => toast.success(`Deleted ${document.name}`, { description: 'Its embeddings were removed too.' }))
       .catch((deleteError: unknown) =>
-        toast.error(`Couldn't delete ${document.name}`, { description: errorMessage(deleteError) }),
+        toast.error(`Couldn't Delete ${document.name}`, { description: errorMessage(deleteError) }),
       )
 
   if (isError && documents.length === 0) {
     return (
       <div className="rounded-card border border-border bg-surface p-8 text-center">
-        <p className="font-display text-lg">Couldn't load your documents</p>
+        <p className="font-display text-lg">Couldn't Load Your Documents</p>
         <p className="mt-1 text-sm text-muted">{errorMessage(error)}</p>
         <Button variant="secondary" className="mt-5" onClick={() => refetch()} disabled={isRefetching}>
           <RotateCw className={cn('size-4', isRefetching && 'animate-spin')} />
@@ -55,7 +55,7 @@ export function DocumentList() {
     return (
       <div className="flex flex-col items-center rounded-card border border-border bg-surface px-6 py-14 text-center">
         <Logo variant="mark" className="h-14 opacity-90" />
-        <p className="mt-5 font-display text-xl">Your knowledge base is empty</p>
+        <p className="mt-5 font-display text-xl">Your Knowledge Base Is Empty</p>
         <p className="mt-1 max-w-sm text-sm text-muted">
           Upload a PDF above. Once it's processed you can ask questions about it on the Ask page.
         </p>
@@ -103,7 +103,7 @@ export function DocumentList() {
       <ConfirmDialog
         open={documentToDelete !== null}
         onOpenChange={(open) => !open && setDocumentToDelete(null)}
-        title="Delete this document?"
+        title="Delete This Document?"
         description={
           <>
             <p className="font-label text-xs break-all text-text">{documentToDelete?.name}</p>
