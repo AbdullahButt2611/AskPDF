@@ -39,5 +39,9 @@ class WorkflowTimeoutError(AppError):
     status_code = status.HTTP_504_GATEWAY_TIMEOUT
 
 
-class EmbeddingError(Exception):
-    """Raised inside workflows when Gemini embeddings fail; surfaces in Inngest run logs."""
+class GeminiRequestError(Exception):
+    """A Gemini API call failed in a way that may succeed on retry (network error, overload, 5xx)."""
+
+
+class GeminiQuotaExceededError(GeminiRequestError):
+    """Gemini rejected the call because the API key's quota or rate limit is used up (HTTP 429)."""

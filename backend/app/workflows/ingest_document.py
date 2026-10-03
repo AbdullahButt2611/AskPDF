@@ -7,6 +7,8 @@ from typing import Any
 import inngest
 from pydantic import BaseModel
 
+from app.core.config import settings
+from app.core.exceptions import GeminiQuotaExceededError
 from app.schemas.document import DocumentChunks, IngestionResult
 from app.services.document_registry import document_registry
 from app.services.embeddings import embed_texts
@@ -14,7 +16,14 @@ from app.services.pdf_processing import load_and_chunk_pdf
 from app.services.vector_store import vector_store
 from app.workflows.client import DOCUMENT_UPLOADED_EVENT, inngest_client
 
-_GENERIC_FAILURE_MESSAGE = "Processing failed. Try uploading the file again."
+_PROCESSING_FAILED_MESSAGE = (
+    "Something went wrong while processing this document. Please try again in a while, "
+    "or contact support if the problem continues."
+)
+_QUOTA_EXCEEDED_MESSAGE = (
+    "Something went wrong while processing this document: we've reached our AI usage limit. "
+    "Please try again in a while, or contact support if this keeps happening."
+)
 
 
 class _RunError(BaseModel):
@@ -36,7 +45,7 @@ class _FailedIngestion(BaseModel):
 async def _mark_ingestion_failed(ctx: inngest.Context) -> None:
     failure = _FailedIngestion.model_validate(ctx.event.data)
     # Only NonRetriableError messages are written for users; anything else is an internal failure
-    message = failure.error.message if failure.error.name == "NonRetriableError" else _GENERIC_FAILURE_MESSAGE
+    message = failure.error.message if failure.error.name == "NonRetriableError" else _PROCESSING_FAILED_MESSAGE
     await document_registry.mark_failed(
         failure.event.data["source_id"], failure.event.data["upload_id"], message
     )
@@ -47,6 +56,7 @@ async def _mark_ingestion_failed(ctx: inngest.Context) -> None:
     name="Ingest document",
     trigger=inngest.TriggerEvent(event=DOCUMENT_UPLOADED_EVENT),
     throttle=inngest.Throttle(limit=2, period=datetime.timedelta(minutes=1)),
+    retries=settings.ai_max_retries,
     on_failure=_mark_ingestion_failed,
 )
 async def ingest_document(ctx: inngest.Context) -> dict[str, Any]:
@@ -78,7 +88,11 @@ async def _load_and_chunk(pdf_path: Path, source_id: str, upload_id: str) -> Doc
 
 
 async def _embed_and_store(document: DocumentChunks) -> IngestionResult:
-    vectors = await embed_texts(document.chunks)
+    try:
+        vectors = await embed_texts(document.chunks)
+    except GeminiQuotaExceededError as exc:
+        # Retrying can't help until the quota resets, so fail right away with a clear reason
+        raise inngest.NonRetriableError(_QUOTA_EXCEEDED_MESSAGE) from exc
     ids = [
         str(uuid.uuid5(uuid.NAMESPACE_URL, f"{document.upload_id}:{index}"))
         for index in range(len(document.chunks))

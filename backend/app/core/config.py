@@ -22,8 +22,10 @@ class Settings:
     gemini_base_url: str = "https://generativelanguage.googleapis.com/v1beta"
     embedding_model: str = "gemini-embedding-001"
     embedding_dimensions: int = 3072
-    # Tried in order; later models are fallbacks when earlier ones are overloaded or failing
+    # Each retry of an answer moves to the next model, so the fallback works within the retry limit
     answer_models: tuple[str, ...] = ("gemini-3.5-flash-lite", "gemini-2.5-flash-lite")
+    # Retries after the first attempt for any AI call (embeddings and answers). Quota errors are never retried.
+    ai_max_retries: int = 2
 
     qdrant_url: str = "http://localhost:6333"
     qdrant_collection: str = "docs"
