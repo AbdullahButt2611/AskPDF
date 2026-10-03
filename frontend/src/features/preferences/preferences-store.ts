@@ -6,21 +6,27 @@ export type ThemePreference = 'light' | 'dark' | 'system'
 export const PASSAGE_COUNT_OPTIONS = [3, 5, 8, 12] as const
 export type PassageCount = (typeof PASSAGE_COUNT_OPTIONS)[number]
 
-interface PreferencesState {
+interface Preferences {
   theme: ThemePreference
   passagesPerAnswer: PassageCount
+}
+
+interface PreferencesState extends Preferences {
   setTheme: (theme: ThemePreference) => void
   setPassagesPerAnswer: (count: PassageCount) => void
+  reset: () => void
 }
+
+export const DEFAULT_PREFERENCES: Preferences = { theme: 'system', passagesPerAnswer: 5 }
 
 // The storage key is also read by the inline script in index.html to apply the theme before first paint
 export const usePreferencesStore = create<PreferencesState>()(
   persist(
     (set) => ({
-      theme: 'system',
-      passagesPerAnswer: 5,
+      ...DEFAULT_PREFERENCES,
       setTheme: (theme) => set({ theme }),
       setPassagesPerAnswer: (passagesPerAnswer) => set({ passagesPerAnswer }),
+      reset: () => set(DEFAULT_PREFERENCES),
     }),
     { name: 'askpdf-preferences' },
   ),

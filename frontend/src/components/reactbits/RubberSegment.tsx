@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { animate, motion, useMotionValue, useReducedMotion, useTransform, type MotionValue } from 'motion/react';
+import { animate, motion, useMotionValue, useMotionValueEvent, useReducedMotion, type MotionValue } from 'motion/react';
 
 export type RubberSegmentSize = 'sm' | 'md' | 'lg';
 export type RubberSegmentItem = string | { value: string; label: ReactNode; icon?: ReactNode };
@@ -124,9 +124,16 @@ const RubberSegment: React.FC<RubberSegmentProps> = ({
   const edgeR = useMotionValue(0);
   const innerW = useMotionValue(0);
   const thumbRadius = Math.max(0, radius - inset);
-  const clipPath = useTransform(
-    () => `inset(0 ${Math.max(0, innerW.get() - edgeR.get())}px 0 ${Math.max(0, edgeL.get())}px round ${thumbRadius}px)`
-  );
+  // Written directly rather than derived with useTransform: a derived value could miss the first measurement
+  // (e.g. React's dev double-mount), leaving the thumb covering every option. Hidden until measured.
+  const clipPath = useMotionValue('inset(0 100% 0 0)');
+  const syncClip = () =>
+    clipPath.set(
+      `inset(0 ${Math.max(0, innerW.get() - edgeR.get())}px 0 ${Math.max(0, edgeL.get())}px round ${thumbRadius}px)`
+    );
+  useMotionValueEvent(edgeL, 'change', syncClip);
+  useMotionValueEvent(edgeR, 'change', syncClip);
+  useMotionValueEvent(innerW, 'change', syncClip);
 
   const t = (seconds: number) => seconds / speed;
 
@@ -137,6 +144,7 @@ const RubberSegment: React.FC<RubberSegmentProps> = ({
     gen.current += 1;
     edgeL.jump(s.l);
     edgeR.jump(s.r);
+    syncClip();
   };
 
   const measure = () => {

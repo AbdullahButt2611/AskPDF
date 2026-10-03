@@ -4,13 +4,13 @@ import { useRef, useState } from 'react'
 import { Link } from 'react-router'
 
 import { AmbientBackground } from '@/components/brand/AmbientBackground'
+import { Highlight } from '@/components/brand/Highlight'
+import { DropOverlay } from '@/components/feedback/DropOverlay'
 import type { KnowledgeDocument } from '@/features/documents/api'
 import { usePdfDropzone } from '@/features/documents/use-pdf-dropzone'
 import { pluralize } from '@/lib/format'
 
-import { DropOverlay } from './DropOverlay'
 import { HeroPrompt } from './HeroPrompt'
-import { Highlight } from './Highlight'
 import { PaperStack } from './PaperStack'
 
 const EASE_OUT = [0.23, 1, 0.32, 1] as const
@@ -85,106 +85,109 @@ export function ChatWelcome({ readyDocuments, onAsk }: ChatWelcomeProps) {
   }
 
   return (
-    <div {...getRootProps({ className: 'relative isolate h-full overflow-y-auto outline-none' })}>
+    <div {...getRootProps({ className: 'relative isolate h-full outline-none' })}>
       <input {...getInputProps()} />
       <AmbientBackground />
       <DropOverlay visible={isDragActive} />
+      {/* Only this inner element scrolls, so the background and drop overlay always cover the visible area */}
+      <div className="h-full overflow-y-auto">
 
-      <section className="mx-auto grid min-h-full w-full max-w-6xl items-center gap-10 px-5 py-10 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:px-10 xl:gap-24">
-        <motion.div variants={container} initial="hidden" animate="visible" className="@container relative">
-          <motion.p
-            variants={rise}
-            className="flex flex-wrap items-center gap-x-3 gap-y-1 font-label text-[11px] font-semibold tracking-[0.14em] text-subtle uppercase"
-          >
-            <span>{greeting()}</span>
-            <Link to="/knowledge-base" className="group inline-flex items-center gap-2 transition-colors hover:text-text">
-              <span className="relative flex size-2">
-                {hasDocuments && (
-                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-60" />
-                )}
-                <span className={`relative inline-flex size-2 rounded-full ${hasDocuments ? 'bg-success' : 'bg-subtle'}`} />
-              </span>
-              {hasDocuments ? `${pluralize(readyDocuments.length, 'document')} ready` : 'No documents yet'}
-            </Link>
-          </motion.p>
+        <section className="mx-auto grid min-h-full w-full max-w-6xl items-center gap-10 px-5 py-10 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:px-10 xl:gap-24">
+          <motion.div variants={container} initial="hidden" animate="visible" className="@container relative">
+            <motion.p
+              variants={rise}
+              className="flex flex-wrap items-center gap-x-3 gap-y-1 font-label text-[11px] font-semibold tracking-[0.14em] text-subtle uppercase"
+            >
+              <span>{greeting()}</span>
+              <Link to="/knowledge-base" className="group inline-flex items-center gap-2 transition-colors hover:text-text">
+                <span className="relative flex size-2">
+                  {hasDocuments && (
+                    <span className="absolute inline-flex size-full animate-ping rounded-full bg-success opacity-60" />
+                  )}
+                  <span className={`relative inline-flex size-2 rounded-full ${hasDocuments ? 'bg-success' : 'bg-subtle'}`} />
+                </span>
+                {hasDocuments ? `${pluralize(readyDocuments.length, 'document')} ready` : 'No documents yet'}
+              </Link>
+            </motion.p>
 
-          <motion.h1
-            variants={rise}
-            className="mt-5 font-display text-[clamp(2.5rem,12cqi,5.4rem)] leading-[0.98] tracking-[-0.035em]"
-          >
-            {hasDocuments ? (
-              <>
-                <span className="block whitespace-nowrap">Your Pages Hold</span>
-                <span className="block whitespace-nowrap">
-                  the <Highlight delay={isStatic ? 0 : 0.85}>Answers.</Highlight>
-                </span>
-              </>
-            ) : (
-              <>
-                <span className="block whitespace-nowrap">Let&apos;s Start</span>
-                <span className="block whitespace-nowrap">
-                  <Highlight delay={isStatic ? 0 : 0.85}>Reading.</Highlight>
-                </span>
-              </>
+            <motion.h1
+              variants={rise}
+              className="mt-5 font-display text-[clamp(2.5rem,12cqi,5.4rem)] leading-[0.98] tracking-[-0.035em]"
+            >
+              {hasDocuments ? (
+                <>
+                  <span className="block whitespace-nowrap">Your Pages Hold</span>
+                  <span className="block whitespace-nowrap">
+                    the <Highlight delay={isStatic ? 0 : 0.85}>Answers.</Highlight>
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="block whitespace-nowrap">Let&apos;s Start</span>
+                  <span className="block whitespace-nowrap">
+                    <Highlight delay={isStatic ? 0 : 0.85}>Reading.</Highlight>
+                  </span>
+                </>
+              )}
+            </motion.h1>
+
+            <motion.p variants={rise} className="mt-6 max-w-lg text-base leading-relaxed text-muted sm:text-lg">
+              {hasDocuments
+                ? 'Ask about anything in your documents. Every answer comes straight from your pages, with the sources to prove it.'
+                : 'Drop a PDF anywhere on this page to add it. Then ask about it in plain language and get answers straight from its pages.'}
+            </motion.p>
+
+            <motion.div variants={rise} className="mt-8">
+              <HeroPrompt
+                value={draft}
+                onChange={setDraft}
+                onSubmit={onAsk}
+                suggestions={buildSuggestions(readyDocuments)}
+                disabled={!hasDocuments}
+                inputRef={inputRef}
+              />
+            </motion.div>
+
+            {hasDocuments && (
+              <motion.ul variants={rise} className="mt-4 flex flex-wrap gap-2" aria-label="Quick starts">
+                {buildQuickActions(readyDocuments).map(({ label, icon: Icon, template }) => (
+                  <li key={label}>
+                    <button
+                      type="button"
+                      onClick={() => prefill(template)}
+                      className="group inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-surface/70 px-3.5 py-2 text-sm font-medium backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:bg-surface active:translate-y-0"
+                    >
+                      <Icon className="size-4 text-subtle transition-colors group-hover:text-primary" />
+                      {label}
+                    </button>
+                  </li>
+                ))}
+              </motion.ul>
             )}
-          </motion.h1>
 
-          <motion.p variants={rise} className="mt-6 max-w-lg text-base leading-relaxed text-muted sm:text-lg">
-            {hasDocuments
-              ? 'Ask about anything in your documents. Every answer comes straight from your pages, with the sources to prove it.'
-              : 'Drop a PDF anywhere on this page to add it. Then ask about it in plain language and get answers straight from its pages.'}
-          </motion.p>
-
-          <motion.div variants={rise} className="mt-8">
-            <HeroPrompt
-              value={draft}
-              onChange={setDraft}
-              onSubmit={onAsk}
-              suggestions={buildSuggestions(readyDocuments)}
-              disabled={!hasDocuments}
-              inputRef={inputRef}
-            />
+            <motion.p
+              variants={rise}
+              className="mt-6 hidden font-label text-[11px] font-semibold tracking-wider text-subtle uppercase sm:block"
+            >
+              Tip · drop a PDF anywhere on this page to add it
+            </motion.p>
           </motion.div>
 
-          {hasDocuments && (
-            <motion.ul variants={rise} className="mt-4 flex flex-wrap gap-2" aria-label="Quick starts">
-              {buildQuickActions(readyDocuments).map(({ label, icon: Icon, template }) => (
-                <li key={label}>
-                  <button
-                    type="button"
-                    onClick={() => prefill(template)}
-                    className="group inline-flex cursor-pointer items-center gap-2 rounded-full border border-border bg-surface/70 px-3.5 py-2 text-sm font-medium backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:border-primary hover:bg-surface active:translate-y-0"
-                  >
-                    <Icon className="size-4 text-subtle transition-colors group-hover:text-primary" />
-                    {label}
-                  </button>
-                </li>
-              ))}
-            </motion.ul>
-          )}
-
-          <motion.p
-            variants={rise}
-            className="mt-6 hidden font-label text-[11px] font-semibold tracking-wider text-subtle uppercase sm:block"
+          <motion.div
+            initial={isStatic ? { opacity: 0 } : { opacity: 0, x: 40, rotate: 4 }}
+            animate={{ opacity: 1, x: 0, rotate: 0 }}
+            transition={{ duration: 0.9, delay: isStatic ? 0 : 0.25, ease: EASE_OUT }}
           >
-            Tip · drop a PDF anywhere on this page to add it
-          </motion.p>
-        </motion.div>
+            <PaperStack
+              documents={readyDocuments}
+              onPick={(document) => prefill(`Summarize "${displayName(document)}" in five bullet points`)}
+              onUpload={open}
+            />
+          </motion.div>
+        </section>
 
-        <motion.div
-          initial={isStatic ? { opacity: 0 } : { opacity: 0, x: 40, rotate: 4 }}
-          animate={{ opacity: 1, x: 0, rotate: 0 }}
-          transition={{ duration: 0.9, delay: isStatic ? 0 : 0.25, ease: EASE_OUT }}
-        >
-          <PaperStack
-            documents={readyDocuments}
-            onPick={(document) => prefill(`Summarize "${displayName(document)}" in five bullet points`)}
-            onUpload={open}
-          />
-        </motion.div>
-      </section>
-
-      {replaceDialog}
+        {replaceDialog}
+      </div>
     </div>
   )
 }
